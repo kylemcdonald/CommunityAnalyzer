@@ -12,7 +12,7 @@ The idea is to take a data-driven approach to understanding what works and doesn
 
 ## Process
 
-1. Download all issues (takes 30 minutes for openFrameworks).
+1. Download all issues.
 2. Visualize issues opening/closing the way you would the [lineup of Grateful Dead](http://upload.wikimedia.org/wikipedia/en/timeline/4d052688fe7d1eda97e91c09c6477a00.png).
 3. Extract metrics from issues.
 4. Determine impact of metrics on time to completion.
