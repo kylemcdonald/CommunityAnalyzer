@@ -1,9 +1,15 @@
 import json
+import re
 
 owner = "openframeworks"
 repo = "openFrameworks"
 
 all = {}
+
+# this is really hard, but this approach isn't bad. very similar to github's approach apparently.
+replyPattern = re.compile('(\n .+? escribi|\n.+wrote|From: |\n>.+Reply to this email directly).*', re.DOTALL)
+def clean(text):
+	return replyPattern.sub('', text)
 
 for i in range(0, 3005):
 	id = i + 1
@@ -29,7 +35,7 @@ for i in range(0, 3005):
 			commentsData.append({
 				'user': item['user']['login'],
 				'created_at': item['created_at'],
-				'body': item['body']
+				'body': clean(item['body'])
 			})
 
 		eventsData = []
