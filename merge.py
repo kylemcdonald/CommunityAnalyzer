@@ -62,7 +62,8 @@ for i in range(0, 3005):
 			'milestone': milestone,
 			'labels': labels,
 			'comments': commentsData,
-			'events': eventsData
+			'events': eventsData,
+			'pull_request': 'pull_request' in issue
 		}
 		all[id] = cur
 
