@@ -12,6 +12,10 @@ secondsPerDay = 60 * 60 * 24
 # - amount of time to N comments
 # - reached N comments in first K days (binary series)
 
+# instead of doing regression to get duration,
+# consider classifying duration into a few bins
+# one day, one week, one month, one year, more
+
 with open('data/flat.tab', 'wb') as csvfile:
 	writer = csv.writer(csvfile, delimiter='\t')
 	info = [
@@ -46,6 +50,9 @@ with open('data/flat.tab', 'wb') as csvfile:
 		age = (created_at - first).total_seconds() / secondsPerDay
 		closed_at = None
 		duration = None
+		users = []
+		# for comment in issue['comments']:
+		# 	users += 
 		if issue['closed_at'] is not None:
 			closed_at = dateutil.parser.parse(issue['closed_at'])
 			duration = (closed_at - created_at).total_seconds() / secondsPerDay

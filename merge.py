@@ -4,7 +4,7 @@ import re
 owner = "openframeworks"
 repo = "openFrameworks"
 
-all = {}
+all = []
 
 # this is really hard, but this approach isn't bad. very similar to github's approach apparently.
 replyPattern = re.compile('(\n .+? escribi|\n.+wrote|From: |\n>.+Reply to this email directly).*', re.DOTALL)
@@ -54,6 +54,7 @@ for i in range(0, 3005):
 			milestone = issue['milestone']['title']
 
 		cur = {
+			'id': id,
 			'title': issue['title'],
 			'user': issue['user']['login'],
 			'created_at': issue['created_at'],
@@ -65,7 +66,7 @@ for i in range(0, 3005):
 			'events': eventsData,
 			'pull_request': 'pull_request' in issue
 		}
-		all[id] = cur
+		all.append(cur);
 
 with open('data/merged.json', 'w') as out:
 	json.dump(all, out, indent=2)
