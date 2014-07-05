@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+  font-family: sans-serif;
+}
+</style>
+<body>
+<script src="scripts/d3.min.js" charset="utf-8"></script>
+<script>
+var width = 1280, height = 720;
+var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
+
+function convertDates(data, field) {
+  for(var key in data) {
+    data[key][field] = new Date(data[key][field]);
+  }
+}
+
+var dateRange = new Date("February 1") - new Date("January 1");
+var durationScale = d3.scale.linear().domain([0, dateRange]).range([0, 180]);
+var xScale = d3.scale.linear().domain([0, dateRange]).range([0, width]);
+var yScale = d3.scale.linear().domain([0, 20]).range([height, 0]);
+
+d3.json("../data/merged.json", function(error, data) {
+  merged = data;
+
+  // convert all date fields to Date objects
+  convertDates(data, 'created_at');
+  convertDates(data, 'closed_at');
+  for(var key in data) {
+    convertDates(data[key].comments, 'created_at');
+    convertDates(data[key].events, 'created_at');
+  }
+
+  for(var i = 0; i < data.length; i++) {
+    var issue = data[i];
+    var lineData = [];
+    var cur = issue.comments;
+    var duration = 0;
+    for(var j = 0; j < cur.length; j++) {
+      duration += (cur[j].created_at - issue.created_at);
+      lineData.push({
+        "x": xScale(duration),
+        "y": yScale(j)
+      });
+    }
+
+    var lineFunction = d3.svg.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+      .interpolate("linear");
+
+    var lineGraph = svg.append("path")
+      .attr("d", lineFunction(lineData))
+      .attr("stroke", d3.hsl(durationScale(duration), 1, .5))
+      .attr("opacity", .5)
+      .attr("stroke-width", 1)
+      .attr("fill", "none");
+  }
+});
+</script>
+</body>
+</html>
