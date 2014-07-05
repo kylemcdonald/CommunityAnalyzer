@@ -16,11 +16,13 @@ var svg = d3.select("body")
 
 function convertDates(data, field) {
   for(var key in data) {
-    data[key][field] = new Date(data[key][field]);
+    if(data[key][field]) {
+      data[key][field] = new Date(data[key][field]);
+    }
   }
 }
 
-var dateRange = new Date("February 1") - new Date("January 1");
+var dateRange = new Date("January 2") - new Date("January 1");
 var durationScale = d3.scale.linear().domain([0, dateRange]).range([0, 180]);
 var xScale = d3.scale.linear().domain([0, dateRange]).range([0, width]);
 var yScale = d3.scale.linear().domain([0, 20]).range([height, 0]);
@@ -29,20 +31,21 @@ d3.json("../data/merged.json", function(error, data) {
   merged = data;
 
   // convert all date fields to Date objects
-  convertDates(data, 'created_at');
-  convertDates(data, 'closed_at');
   for(var key in data) {
     convertDates(data[key].comments, 'created_at');
     convertDates(data[key].events, 'created_at');
   }
+  convertDates(data, 'created_at');
+  convertDates(data, 'closed_at');
 
   for(var i = 0; i < data.length; i++) {
     var issue = data[i];
-    var lineData = [];
+
     var cur = issue.comments;
-    var duration = 0;
+
+    var lineData = [];
     for(var j = 0; j < cur.length; j++) {
-      duration += (cur[j].created_at - issue.created_at);
+      var duration = cur[j].created_at - issue.created_at;
       lineData.push({
         "x": xScale(duration),
         "y": yScale(j)
