@@ -8,7 +8,7 @@ body {
 <body>
 <script src="scripts/d3.min.js" charset="utf-8"></script>
 <script>
-var width = 1280, height = 720;
+var width = 720, height = 720;
 var svg = d3.select("body")
   .append("svg")
   .attr("width", width)
@@ -22,14 +22,26 @@ function convertDates(data, field) {
   }
 }
 
-var dateRange = new Date("January 2") - new Date("January 1");
-var durationScale = d3.scale.linear().domain([0, dateRange]).range([0, 180]);
-var xScale = d3.scale.linear().domain([0, dateRange]).range([0, width]);
-var yScale = d3.scale.linear().domain([0, 20]).range([height, 0]);
+function mergeEvents(events) {
+  var all = [];
+  for(var key in events) {
+    all = all.concat(events[key]);
+  }
+  all = all.sort(function(a, b) {
+    return a.created_at - b.created_at;
+  })
+  return all;
+}
+
+var day = new Date("January 2") - new Date("January 1");
+var week = new Date("January 8") - new Date("January 1");
+var month = new Date("February 1") - new Date("January 1");
+var year = new Date("January 2014") - new Date("January 2013");
+var ageScale = d3.scale.linear()
+  .domain([0, day, week, month, year])
+  .range([180*0/4, 180*1/4, 180*2/4, 180*3/4, 180*4/4]);
 
 d3.json("../data/merged.json", function(error, data) {
-  merged = data;
-
   // convert all date fields to Date objects
   for(var key in data) {
     convertDates(data[key].comments, 'created_at');
@@ -40,29 +52,48 @@ d3.json("../data/merged.json", function(error, data) {
 
   for(var i = 0; i < data.length; i++) {
     var issue = data[i];
+    var age = issue.closed_at - issue.created_at;
+    if(issue.closed_at) {
+      var createdEvent = {
+        'event': 'created',
+        'created_at': issue.created_at
+      };
+      var closedEvent = {
+        'event': 'closed',
+        'created_at': issue.closed_at
+      };
+      var all = mergeEvents([
+        issue.comments,
+        issue.events,
+        [createdEvent, closedEvent]]);
 
-    var cur = issue.comments;
+      var lineData = [];
+      for(var j = 0; j < all.length; j++) {
+        lineData.push({
+          "x": all[j].created_at,
+          "y": j
+        });
+      }
 
-    var lineData = [];
-    for(var j = 0; j < cur.length; j++) {
-      var duration = cur[j].created_at - issue.created_at;
-      lineData.push({
-        "x": xScale(duration),
-        "y": yScale(j)
-      });
+      // var closeIndex = all.indexOf(closedEvent);
+      var xScale = d3.scale.linear()
+        .domain([issue.created_at, issue.closed_at])
+        .range([0, width / 2]);
+      var yScale = d3.scale.linear()
+        .domain([0, closeIndex])
+        .range([height, height / 2]);
+
+      var lineFunction = d3.svg.line()
+        .x(function(d) { return xScale(d.x) })
+        .y(function(d) { return yScale(d.y) });
+
+      var lineGraph = svg.append("path")
+        .attr("d", lineFunction(lineData))
+        .attr("stroke", d3.hsl(ageScale(age), 1, .5))
+        .attr('opacity', .2)
+        .attr("stroke-width", 1)
+        .attr("fill", "none");
     }
-
-    var lineFunction = d3.svg.line()
-      .x(function(d) { return d.x; })
-      .y(function(d) { return d.y; })
-      .interpolate("linear");
-
-    var lineGraph = svg.append("path")
-      .attr("d", lineFunction(lineData))
-      .attr("stroke", d3.hsl(durationScale(duration), 1, .5))
-      .attr("opacity", .5)
-      .attr("stroke-width", 1)
-      .attr("fill", "none");
   }
 });
 </script>
