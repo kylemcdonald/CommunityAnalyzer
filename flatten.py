@@ -7,63 +7,65 @@ import numpy
 data = json.load(open('data/merged.json'))
 first = dateutil.parser.parse(data[0]['created_at'])
 secondsPerDay = 60 * 60 * 24
-
-# instead of doing regression to get duration,
-# consider classifying duration into a few bins
-# one day, one week, one month, one year, unclosed
+secondsPerWeek = secondsPerDay * 7
+secondsPerMonth = secondsPerDay * 30
 
 # more features to consider:
-# - recent activity on github (i.e., predict bug marathon)
+# - recent issue frequency (i.e., bug fix marathons)
 
 # for each event that happens, we have a snapshot of the issue at a different state
 # we can use it as a datapoint, where we save all that we know at that moment
 # plus the amuont of time left to close the issue
 
-# first, add the extra metrics, then separate into as many data points as possible
-
-# can we just predict boolean closed/unclosed?
+# add liwc
 
 with open('data/flat.tab', 'wb') as csvfile:
 	writer = csv.writer(csvfile, delimiter='\t')
 	info = [
 		# 'id', 'c', '',
+
+		'title length', 'c', '',
 		'body length', 'c', '',
 		'label count', 'c', '',
+
 		'is pull request', 'd', '',
-		'title length', 'c', '',
 
-		'is milestone', 'd', '',
+		'has milestone', 'd', '',
 
-		'user count', 'c', '',
-		'comment count', 'c', '',
-		'user comment ratio', 'c', '',
-		'multiple posts', 'd', '',
-		'comments length', 'c', '',
-		'comments average length', 'c', '',
-		'first comment frequency', 'c', '',
-		'long pause frequency', 'c', '',
-		'short pause frequency', 'c', '',
-		'pause deviation', 'c', '',
+		# 'user count', 'c', '',
+		# 'comment count', 'c', '',
+		# 'user comment ratio', 'c', '',
+		# 'multiple posts', 'd', '',
+		# 'comments length', 'c', '',
+		# 'comments average length', 'c', '',
+		# 'first comment frequency', 'c', '',
 
-		# number of mentions
-		'event count', 'c', '',
-		# event speed
+		# 'long pause frequency', 'c', '',
+		# 'short pause frequency', 'c', '',
+		# 'pause deviation', 'c', '',
+
+		# 'event count', 'c', '',
 
 		# 'age', 'c', '',
-		'close frequency', 'c', 'class',
+		# 'close frequency', 'c', 'class',
+		'close category', 'd', 'class'
 	]
 	writer.writerow(info[0::3])
 	writer.writerow(info[1::3])
 	writer.writerow(info[2::3])
+
 	for issue in data:
 		id = issue['id']
 		created_at = dateutil.parser.parse(issue['created_at'])
 		age = (created_at - first).total_seconds() / secondsPerDay
 		closed_at = None
 		duration = None
+		closeCategory = 'Long'
 		if issue['closed_at'] is not None:
 			closed_at = dateutil.parser.parse(issue['closed_at'])
 			duration = (closed_at - created_at).total_seconds()
+			if duration < secondsPerMonth:
+				closeCategory = 'Short'
 		else:
 			duration = float("inf")
 		closeFrequency = float(secondsPerDay) / duration
@@ -100,28 +102,29 @@ with open('data/flat.tab', 'wb') as csvfile:
 		writer.writerow([
 			# id,
 
+			len(issue['title']),
 			len(issue['body']),	
 			len(issue['labels']),
 
 			issue['pull_request'],
-			len(issue['title']),
 
 			issue['milestone'] != '',
 
-			userCount,
-			commentCount,
-			commentUserRatio,
-			commentCount > userCount,
-			commentsLength,
-			commentsLengthAverage,
-			firstCommentFrequency,
+			# userCount,
+			# commentCount,
+			# commentUserRatio,
+			# commentCount > userCount,
+			# commentsLength,
+			# commentsLengthAverage,
+			# firstCommentFrequency,
 
-			longestPauseFrequency,
-			shortestPauseFrequency,
-			pauseDeviation,
+			# longestPauseFrequency,
+			# shortestPauseFrequency,
+			# pauseDeviation,
 
-			len(issue['events']),
+			# len(issue['events']),
 
 			# age,
-			closeFrequency,
+			# closeFrequency,
+			closeCategory
 		])
