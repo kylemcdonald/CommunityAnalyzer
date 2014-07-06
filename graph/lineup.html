@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+  font-family: sans-serif;
+}
+</style>
+<body>
+<script src="scripts/d3.min.js" charset="utf-8"></script>
+<script>
+var width = 1280, height = 720;
+var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("stroke-width", 1)
+  .attr("fill", "none");
+
+function convertDates(data, field) {
+  for(var key in data) {
+    if(data[key][field]) {
+      data[key][field] = new Date(data[key][field]);
+    }
+  }
+}
+
+var now = new Date();
+
+d3.json("../data/merged.json", function(error, data) {
+  for(var key in data) {
+    convertDates(data[key].comments, 'created_at');
+    convertDates(data[key].events, 'created_at');
+  }
+  convertDates(data, 'created_at');
+  convertDates(data, 'closed_at');
+
+  var durationMap = d3.scale.linear()
+    .domain([data[0].created_at, now])
+    .range([0, 360]);
+  var textLengthMap = d3.scale.linear()
+    .domain([0, 1000])
+    .range([0, 360]);
+
+  var xScale = d3.scale.linear()
+    .domain([data[0].created_at, now])
+    .range([0, width]);
+
+  var yScale = d3.scale.linear()
+    .domain([0, data.length])
+    .range([0, height]);
+
+  var lineFunction = d3.svg.line()
+    .x(function(d) { return xScale(d.x) })
+    .y(function(d) { return yScale(d.y) });
+
+  for(var i = 0; i < data.length; i++) {
+    var issue = data[i];
+    if(issue.closed_at == null) {
+      issue.closed_at = now;
+      // continue; // ignore unclosed
+    } else {
+      // continue; // ignored closed
+    }
+
+    var lineData = [];
+    var k = i;
+    var step = 20;
+    lineData.push({x: issue.created_at, y: k+=step});
+    var comments = issue.comments;
+    for(var j = 0; j < comments.length; j++) {
+      lineData.push({x: comments[j].created_at, y: k+=step})
+    }
+    lineData.push({x: issue.closed_at, y: k+=step});
+
+    var duration = issue.closed_at - issue.created_at;
+
+    // var hue = durationMap(duration);
+    var hue = textLengthMap(issue.body.length);
+    // var hue = textLengthMap(issue.title.length);
+    svg.append("path")
+      .attr("d", lineFunction(lineData))
+      .attr('stroke', d3.hsl(hue, 1, .5))
+      .attr('opacity', .2);
+  }
+});
+</script>
+</body>
+</html>

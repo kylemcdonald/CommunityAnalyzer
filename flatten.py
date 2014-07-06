@@ -14,7 +14,13 @@ secondsPerDay = 60 * 60 * 24
 
 # instead of doing regression to get duration,
 # consider classifying duration into a few bins
-# one day, one week, one month, one year, more
+# one day, one week, one month, one year, unclosed
+
+# more features to consider:
+# - time until first comment
+# - minimum time between comments
+# - maximum time between comments
+# - has multiple comments from same user (number of comments > number of users)
 
 with open('data/flat.tab', 'wb') as csvfile:
 	writer = csv.writer(csvfile, delimiter='\t')

@@ -75,7 +75,7 @@ d3.json("../data/merged.json", function(error, data) {
         });
       }
 
-      // var closeIndex = all.indexOf(closedEvent);
+      var closeIndex = all.indexOf(closedEvent);
       var xScale = d3.scale.linear()
         .domain([issue.created_at, issue.closed_at])
         .range([0, width / 2]);
