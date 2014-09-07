@@ -32,22 +32,23 @@ with open('data/flat.tab', 'wb') as csvfile:
 
 		'has milestone', 'd', '',
 
-		# 'user count', 'c', '',
-		# 'comment count', 'c', '',
-		# 'user comment ratio', 'c', '',
-		# 'multiple posts', 'd', '',
-		# 'comments length', 'c', '',
-		# 'comments average length', 'c', '',
-		# 'first comment frequency', 'c', '',
+		'user count', 'c', '',
+		'comment count', 'c', '',
+		'user comment ratio', 'c', '',
+		'multiple posts', 'd', '',
+		'comments length', 'c', '',
+		'comments average length', 'c', '',
+		'first comment frequency', 'c', '',
 
-		# 'long pause frequency', 'c', '',
-		# 'short pause frequency', 'c', '',
-		# 'pause deviation', 'c', '',
+		'long pause frequency', 'c', '',
+		'short pause frequency', 'c', '',
+		'pause deviation', 'c', '',
 
-		# 'event count', 'c', '',
+		'event count', 'c', '',
 
-		# 'age', 'c', '',
+		'age', 'c', '',
 		# 'close frequency', 'c', 'class',
+		'duration', 'c', '',
 		'close category', 'd', 'class'
 	]
 	writer.writerow(info[0::3])
@@ -110,21 +111,22 @@ with open('data/flat.tab', 'wb') as csvfile:
 
 			issue['milestone'] != '',
 
-			# userCount,
-			# commentCount,
-			# commentUserRatio,
-			# commentCount > userCount,
-			# commentsLength,
-			# commentsLengthAverage,
-			# firstCommentFrequency,
+			userCount,
+			commentCount,
+			commentUserRatio,
+			commentCount > userCount,
+			commentsLength,
+			commentsLengthAverage,
+			firstCommentFrequency,
 
-			# longestPauseFrequency,
-			# shortestPauseFrequency,
-			# pauseDeviation,
+			longestPauseFrequency,
+			shortestPauseFrequency,
+			pauseDeviation,
 
-			# len(issue['events']),
+			len(issue['events']),
 
-			# age,
+			age,
 			# closeFrequency,
+			duration,
 			closeCategory
 		])
